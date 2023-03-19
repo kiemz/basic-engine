@@ -79,7 +79,7 @@ int main()
 	glBindBuffer(GL_ARRAY_BUFFER, 0);
 	glBindVertexArray(0);
 
-	Shader shaderProgram("../shaders/shader.vs", "../shaders/shader.fs");
+	Shader shaderProgram("shader.vs", "shader.fs");
 	//int  success;
 	//char infoLog[512];
 

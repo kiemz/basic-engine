@@ -4,7 +4,7 @@
 #include <fstream>
 #include <sstream>
 #include <iostream>
-#include <helpers/RootDir.h>
+#include <filesystem>
 class Shader
 {
 public:
@@ -46,10 +46,11 @@ public:
     void setFloat(const std::string& name, float value) const;
 private:
     auto load_shader(std::string filename) -> const char* {
-
-        std::ifstream loader("shaders/" + filename);
+        
+        std::ifstream loader("E:/VS2022/basic-engine/source/shaders/" + filename);
         std::stringstream buffer;
         buffer << loader.rdbuf();
+        std::cout << buffer.str() << std::endl;
         return buffer.str().c_str();
     }
     auto check_error(GLuint shader, std::string type) -> void {
