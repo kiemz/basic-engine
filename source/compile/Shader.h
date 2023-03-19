@@ -13,8 +13,10 @@ public:
 
     // 构造器读取并构建着色器
     Shader(const char* vertexPath, const char* fragmentPath) {
-        const char* vertexShaderSource = load_shader(vertexPath);
-        const char* fragmentShaderSource = load_shader(fragmentPath);
+        auto v_source = load_shader(vertexPath);
+        auto f_source = load_shader(fragmentPath);
+        auto vertexShaderSource = v_source.c_str();
+        const char* fragmentShaderSource = f_source.c_str();
         unsigned int vertexShader, fragmentShader;
 
         vertexShader = glCreateShader(GL_VERTEX_SHADER);
@@ -45,13 +47,14 @@ public:
     void setInt(const std::string& name, int value) const;
     void setFloat(const std::string& name, float value) const;
 private:
-    auto load_shader(std::string filename) -> const char* {
-        
-        std::ifstream loader("E:/VS2022/basic-engine/source/shaders/" + filename);
+    auto load_shader(std::string filename) -> std::string {
+        std::string str = std::filesystem::current_path().generic_string();
+        auto count = str.find("out/build");
+        auto path = str.substr(0, count);
+        std::ifstream loader(path + "source/shaders/" + filename);
         std::stringstream buffer;
         buffer << loader.rdbuf();
-        std::cout << buffer.str() << std::endl;
-        return buffer.str().c_str();
+        return buffer.str();
     }
     auto check_error(GLuint shader, std::string type) -> void {
         GLint success;
