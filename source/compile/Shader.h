@@ -55,6 +55,10 @@ public:
     {
         glUniform1f(glGetUniformLocation(ID, name.c_str()), value);
     }
+    void setMat4(const std::string& name, glm::mat4 value) const
+    {
+        glUniformMatrix4fv(glGetUniformLocation(ID, name.c_str()), 1, GL_FALSE, glm::value_ptr(value));
+    }
 private:
     auto load_shader(std::string filename) -> std::string {
         std::string str = std::filesystem::current_path().generic_string();
