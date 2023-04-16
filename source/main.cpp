@@ -105,7 +105,18 @@ int main()
 		-0.5f,  0.5f,  0.5f,  0.0f,  1.0f,  0.0f,  0.0f,  0.0f,
 		-0.5f,  0.5f, -0.5f,  0.0f,  1.0f,  0.0f,  0.0f,  1.0f
 	};
-
+	glm::vec3 cubePositions[] = {
+		glm::vec3(0.0f,  0.0f,  0.0f),
+		glm::vec3(2.0f,  5.0f, -15.0f),
+		glm::vec3(-1.5f, -2.2f, -2.5f),
+		glm::vec3(-3.8f, -2.0f, -12.3f),
+		glm::vec3(2.4f, -0.4f, -3.5f),
+		glm::vec3(-1.7f,  3.0f, -7.5f),
+		glm::vec3(1.3f, -2.0f, -2.5f),
+		glm::vec3(1.5f,  2.0f, -2.5f),
+		glm::vec3(1.5f,  0.2f, -1.5f),
+		glm::vec3(-1.3f,  1.0f, -1.5f)
+	};
 	unsigned int VBO, cubeVAO;
 	glGenBuffers(1, &VBO);
 	glGenVertexArrays(1, &cubeVAO);
@@ -134,13 +145,11 @@ int main()
 
 	unsigned int diffuseMap = loadTexture("container2.png");
 	unsigned int specularMap = loadTexture("lighting_maps_specular_color.png");
-	unsigned int emissionMap = loadTexture("matrix.jpg");
 	Shader cubeShader("cube.vs", "cube.fs");
 	Shader lightShader("light.vs", "light.fs");
 	cubeShader.use();
 	cubeShader.setInt("material.diffuse", 0);
 	cubeShader.setInt("material.specular", 1);
-	cubeShader.setInt("material.emission", 2);
 
 	while (!glfwWindowShouldClose(window))
 	{
@@ -155,11 +164,18 @@ int main()
 
 		cubeShader.use();
 
-		cubeShader.setFloat("material.shininess", 64.0f);
+		cubeShader.setFloat("material.shininess", 32.0f);
+		cubeShader.setVec3("light.position", camera.Position);
+		cubeShader.setVec3("light.direction", camera.Front);
+		cubeShader.setFloat("light.cutOff", glm::cos(glm::radians(12.5f)));
+		cubeShader.setFloat("light.cutOff", glm::cos(glm::radians(12.5f)));
+		cubeShader.setFloat("light.outerCutOff", glm::cos(glm::radians(17.5f)));
 		cubeShader.setVec3("light.ambient", 0.2f, 0.2f, 0.2f);
 		cubeShader.setVec3("light.diffuse", 0.5f, 0.5f, 0.5f);
 		cubeShader.setVec3("light.specular", 1.0f, 1.0f, 1.0f);
-		cubeShader.setVec3("light.position", lightPos);
+		cubeShader.setFloat("light.constant", 1.0f);
+		cubeShader.setFloat("light.linear", 0.09f);
+		cubeShader.setFloat("light.quadratic", 0.032f);
 		cubeShader.setVec3("viewPos", camera.Position);
 
 		glm::mat4 view = glm::mat4(1.0f);
@@ -177,21 +193,30 @@ int main()
 		glBindTexture(GL_TEXTURE_2D, diffuseMap);
 		glActiveTexture(GL_TEXTURE1);
 		glBindTexture(GL_TEXTURE_2D, specularMap);
-		glActiveTexture(GL_TEXTURE2);
-		glBindTexture(GL_TEXTURE_2D, emissionMap);
 
 		glBindVertexArray(cubeVAO);
-		glDrawArrays(GL_TRIANGLES, 0, 36);
+		for (unsigned int i = 0; i < 10; i++)
+		{
+			// calculate the model matrix for each object and pass it to shader before drawing
+			glm::mat4 model = glm::mat4(1.0f);
+			model = glm::translate(model, cubePositions[i]);
+			float angle = 20.0f * i;
+			model = glm::rotate(model, glm::radians(angle), glm::vec3(1.0f, 0.3f, 0.5f));
+			cubeShader.setMat4("model", model);
 
-		lightShader.use();
-		lightShader.setMat4("view", view);
-		lightShader.setMat4("projection", projection);
-		model = glm::mat4(1.0f);
-		model = glm::translate(model, lightPos);
-		model = glm::scale(model, glm::vec3(0.2f));
-		lightShader.setMat4("model", model);
+			glDrawArrays(GL_TRIANGLES, 0, 36);
+		}
 
-		glBindVertexArray(cubeVAO);
+		// also draw the lamp object
+		//lightShader.use();
+		//lightShader.setMat4("projection", projection);
+		//lightShader.setMat4("view", view);
+		//model = glm::mat4(1.0f);
+		//model = glm::translate(model, lightPos);
+		//model = glm::scale(model, glm::vec3(0.2f)); // a smaller cube
+		//lightShader.setMat4("model", model);
+
+		glBindVertexArray(lightVAO);
 		glDrawArrays(GL_TRIANGLES, 0, 36);
 
 		glfwSwapBuffers(window);
