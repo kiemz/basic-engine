@@ -20,7 +20,7 @@ if (CMAKE_VERSION VERSION_GREATER 3.12)
   set_property(TARGET basic-engine PROPERTY CXX_STANDARD 20)
 endif()
 
-target_link_libraries(basic-engine glfw3 opengl32 glad stb_image)
+target_link_libraries(basic-engine glfw3 opengl32 glad stb_image assimp-vc143-mtd)
 target_include_directories(basic-engine PUBLIC
     "${CMAKE_CURRENT_SOURCE_DIR}"
 )
